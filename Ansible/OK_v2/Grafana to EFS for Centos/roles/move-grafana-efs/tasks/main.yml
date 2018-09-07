@@ -1,0 +1,40 @@
+---
+- name: Create a new directory in the EFS mount
+  command: mkdir -p /efs/grafana
+- name: copy database to directory in the EFS mount
+  command: cp /var/lib/grafana/grafana.db /efs/grafana
+- name: copy file plugins to directory in the EFS mount
+  command: cp -R /var/lib/grafana/plugins /efs/grafana
+- name: copy file sessions to directory in the EFS mount
+  command: cp -R /var/lib/grafana/sessions /efs/grafana
+- file:
+    path: /efs/grafana
+    mode: 0777
+    recurse: yes
+  
+- name: edit change path database in the file configure  
+  lineinfile:
+        path: /etc/grafana/grafana.ini
+        line: data = /efs/grafana
+        insertafter: ;data = /var/lib/grafana
+- name: edit change path database in the file start  
+  lineinfile:
+        path: /etc/grafana/grafana.ini
+        line: plugins = /efs/grafana/plugins
+        insertafter: ;plugins = /var/lib/grafana/plugins  
+ 
+- replace:
+        dest=/etc/init.d/grafana-server
+        regexp='DATA_DIR=/var/lib/grafana'
+        replace='DATA_DIR=/efs/grafana'
+        backup=yes
+- replace:
+        dest=/etc/init.d/grafana-server
+        regexp='PLUGINS_DIR=/var/lib/grafana/plugins'
+        replace='PLUGINS_DIR=/efs/grafana/plugins'
+        backup=yes         
+  notify: 
+  - restart grafana-server
+
+- name: Start Grafana Service
+  service: name=grafana-server state=started enabled=yes

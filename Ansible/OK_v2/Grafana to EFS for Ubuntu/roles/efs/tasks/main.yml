@@ -1,0 +1,12 @@
+---
+- name: Install NFS
+  apt: pkg=nfs-common state=present
+
+- name: created File and Mount your file system
+  command: mkdir /efs
+  command: mount -t nfs4 fs-52bb2d19.efs.us-east-1.amazonaws.com:/ /efs
+- name: Inserting to mount this mount on boot
+  lineinfile:
+    path: /etc/fstab
+    line: fs-52bb2d19.efs.us-east-1.amazonaws.com:/ /efs           nfs4   defaults,noatime  1   2
+  

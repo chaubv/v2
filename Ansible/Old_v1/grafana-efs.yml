@@ -1,0 +1,12 @@
+---
+- name: Grafana
+  hosts: all
+  #remote_user: root
+  # remote_user: user
+  # become: yes
+  # become_method: sudo
+
+  roles:
+    - efs
+    - move-grafana-efs
+    
